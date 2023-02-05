@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  # These are the configurations for our Node app
+  # When Docker Compose starts this container it will automatically
+  # use the Dockerfile in the directory to configure it
+  orlog_backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile_backend.dev
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_URL="postgresql://root:root@postgres:5432/mydb?schema=public"
+      - PORT=5001
+
+  orlog_frontend:
+    build: 
+      context: ../vite-orlog/
+      dockerfile: Dockerfile_frontend.dev
+    ports:
+      - "3000:3000"
+
+
+  postgres:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      # You can set the value of environment variables
+      # in your docker-compose.yml file
+      # Our Node app will use these to connect
+      # to the database
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=root
+    ports:
+      # Standard port for PostgreSQL databases
+      - "5432:5432"
+
+  # PostgreSQL pgAdmin panel accessible at http://localhost:16543/
+  pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "bygab@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "bygab340!"
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
